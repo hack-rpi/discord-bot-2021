@@ -11,7 +11,8 @@ class TestCog(commands.Cog):
 
     @commands.command()
     async def test(self, ctx):
-        pass
+        await ctx.send('Test')
 
 bot = commands.Bot(command_prefix='/', description='Test bot')
+bot.add_cog(TestCog(bot))
 bot.run(os.getenv("BOT_TOKEN"), bot=True, reconnect=True)
