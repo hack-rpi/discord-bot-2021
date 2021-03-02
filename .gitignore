@@ -1,4 +1,6 @@
 .vagrant/*
 Vagrantfile
 
+venv/*
+
 .env
