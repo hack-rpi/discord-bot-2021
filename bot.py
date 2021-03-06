@@ -8,10 +8,18 @@ load_dotenv()
 class TestCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        print("running")
 
     @commands.command()
-    async def test(self, ctx):
-        await ctx.send('Test')
+    #  takes arguments self = /create, ctx = default channel (no user input)
+    #  channelCategory = channel category, reaction = emoji reaction, 
+    #  text = user's paragraph text
+    async def create(self, ctx, channelCategory, reaction, *, text): 
+        msg = await ctx.send(text)
+        # .add_reaction adds reaction to msg
+        # test case -> emoji = '👍' 
+        await msg.add_reaction(reaction)
+        print("success:  emoji added")
 
 bot = commands.Bot(command_prefix='/', description='Test bot')
 bot.add_cog(TestCog(bot))
