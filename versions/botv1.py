@@ -10,7 +10,6 @@ class TestCog(commands.Cog):
         self.bot = bot
         print("running")
 
-    # REGULAR CHANNEL MESSAGE
     @commands.command()
     #  takes arguments self = /create, ctx = default channel (no user input)
     #  channelCategory = channel category, reaction = emoji reaction, 
@@ -21,16 +20,6 @@ class TestCog(commands.Cog):
         # test case -> emoji = '👍' 
         await msg.add_reaction(reaction)
         print("success:  emoji added")
- 
-    # EMBED MESSAGE
-    @commands.command()
-    async def embed(self, ctx, channelCategory, reaction, *, text):
-         # for customized title, create argument for title, and pass argument into title= 
-        embed=discord.Embed(title="HackRPI", url="https://hackrpi.com/", description=text, color=0xFF5733)
-        msg = await ctx.send(embed=embed)
-        await msg.add_reaction(reaction)
-        print("embed success")
-       
 
 bot = commands.Bot(command_prefix='/', description='Test bot')
 bot.add_cog(TestCog(bot))
