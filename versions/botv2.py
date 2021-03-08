@@ -20,7 +20,7 @@ class TestCog(commands.Cog):
         # .add_reaction adds reaction to msg
         # test case -> emoji = '👍' 
         await msg.add_reaction(reaction)
-        print("success:  emoji added") 
+        print("success:  emoji added")
 
     # EMBED MESSAGE
     @commands.command()
