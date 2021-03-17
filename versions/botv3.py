@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from discord.ext import commands
 import json
 
+client = discord.Client()
+
 load_dotenv()
 
 class TestCog(commands.Cog):
@@ -76,7 +78,7 @@ class TestCog(commands.Cog):
             #!imp privacy overwrites 
             overwrites = {
                 guild.default_role: discord.PermissionOverwrite(read_messages=False),
-                guild.me: discord.PermissionOverwrite(read_messages=True), #admin user permissions (add admin role and set permissions for more helpers)
+                guild.me: discord.PermissionOverwrite(read_messages=True),
                 user: discord.PermissionOverwrite(read_messages=True) #!imp adds user permissions 
             }
 
@@ -86,16 +88,17 @@ class TestCog(commands.Cog):
             category = discord.utils.get(ctx.guild.categories, name=name)
             categoryFin = category #stops channels from going public
 
-            #!creates channel inside of category 
+            #!creates channel inside of category
+            #set counter to 0, to make sure only 1 ticket is created 
             await ctx.guild.create_text_channel("Ticket-{:04d}".format(ticketNumber), category=categoryFin, overwrites=overwrites) 
+            #channel = discord.utils.get(guild.text_channels, name = "Ticket-{:04d}".format(ticketNumber))
             
             #update json file with ticket count 
             data["ticket-counter"] = ticketNumber
             with open("assets/ticketCount.json", "w") as write_file:
                 json.dump(data, write_file)
-# end of object
 
-# driver
+#run
 bot = commands.Bot(command_prefix='/', description='Test bot')
 bot.add_cog(TestCog(bot))
 bot.run(os.getenv("BOT_TOKEN"), bot=True, reconnect=True)
