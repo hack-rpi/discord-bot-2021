@@ -43,7 +43,8 @@ class TestCog(commands.Cog):
 
             category = discord.utils.get(guild.categories, name=name)
             categoryFin = category #stops channels from going public 
-            #!creates channel inside of category    
+            #!creates channel inside of category  
+            # guild = self.bot.get_guild(payload.guild_id)  
             await guild.create_text_channel("Ticket-{:04d}".format(ticketNumber), category=categoryFin, overwrites=overwrites) 
             
             #remove emoji after channel creation:
