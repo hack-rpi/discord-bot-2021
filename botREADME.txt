@@ -1,5 +1,16 @@
 Scope and Concept: 
 
+4/5 Task:
+    Within the user's new channel, create an embed with a reaction
+    When a user reacts with the reaction, the channel will be deleted.
+
+    This task also included adding the channel type to the footer of the embed, 
+    so the on_raw_reaction_add function can be fully functional for different on_ reaction tasks
+
+    Grab the footer channel type: 
+    if embed footer type == help_channel, then initialize help channel
+    else if embed footer type == delete_channel, then delete channel
+
 LATEST 3/31 Task: 
     /embed HELP_DESK :envelope_with_arrow: Any questions? React with :envelope_with_arrow: to get them answered!
 

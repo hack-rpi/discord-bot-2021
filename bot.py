@@ -55,6 +55,25 @@ class TestCog(commands.Cog):
             data["ticket-counter"] = ticketNumber
             with open("assets/ticketCount.json", "w") as write_file:
                 json.dump(data, write_file)
+
+            #!CURRENT
+            '''get info from embed footer
+               if (footer text = delete_help_channel): delete user channel on reaction
+               if (footer text = help_channel): create user channel (above) on reaction'''
+            #!create new embed in user's channel
+            # for customized title, create argument for title, and pass argument into title= 
+            embed=discord.Embed(title="We are happy to assist you!", url="https://hackrpi.com/", description="A representative will be with you shortly. If your case can be closed, react to this message with the :lock: emoji, and the channel will be deleted.", color=0x8E2D25)
+            file = discord.File("assets/f20logo.png", filename="f20logo.png")
+            embed.set_thumbnail(url="attachment://f20logo.png") 
+            #set footer
+            embed.set_footer(text="delete_help_channel") #add category to embed footer 
+            channel = discord.utils.get(guild.channels, name="Ticket-{:04d}".format(ticketNumber))
+            channel_id = channel.id
+            channel = bot.get_channel(channel_id)
+            msg = await channel.send(file=file, embed=embed) 
+        
+            await msg.add_reaction(":lock:") 
+
     #end of on_raw_reaction_add
 
     # REGULAR CHANNEL MESSAGE
