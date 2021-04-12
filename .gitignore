@@ -4,3 +4,4 @@ Vagrantfile
 venv/*
 
 .env
+.idea/*
