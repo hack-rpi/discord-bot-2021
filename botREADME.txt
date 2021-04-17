@@ -1,6 +1,8 @@
 Scope and Concept: 
 
-4/5 Task:
+4/5 Task: COMPLETE by Charles
+    Test case:  /embed HELP_DESK :envelope_with_arrow: Any questions? React with :envelope_with_arrow: to get them answered!
+    
     Within the user's new channel, create an embed with a reaction
     When a user reacts with the reaction, the channel will be deleted.
 
@@ -11,7 +13,7 @@ Scope and Concept:
     if embed footer type == help_channel, then initialize help channel
     else if embed footer type == delete_channel, then delete channel
 
-LATEST 3/31 Task: 
+3/31 Task: COMPLETE by Bryce
     /embed HELP_DESK :envelope_with_arrow: Any questions? React with :envelope_with_arrow: to get them answered!
 
     -> WITH on_raw_reaction(self, payload) <-
@@ -23,7 +25,7 @@ LATEST 3/31 Task:
         grab text from post and look into storing meta data on post 
         Tip: Encode info into json object, base 64, footer area  
 
-3/8 Task:
+3/8 Task: COMPLETE by Bryce
     /embed HELP_DESK :envelope_with_arrow: Any questions? React with :envelope_with_arrow: to get them answered!
     
     When a message is reacted to by a user (non-bot), create a new text channel (with the channel category as one of the bot arguments)
@@ -36,12 +38,12 @@ LATEST 3/31 Task:
         On submit, the bot creates a post with a reaction in the current channel 
         /create    Channel category        Reaction        Text
 
-3/6 Working test case for embed
+3/6 Working test case for embed: COMPLETE by Bryce
     /embed general :thumbsup: hello world
 
     Note: :thumbsup: is an emoji (all emojis universally compatible at https://emojipedia.org/)
 
-3/5 Working test case with emoji:
+3/5 Working test case with emoji: COMPLETE by Bryce
     /create general :thumbsup: hello world 
 
     Note: :thumbsup: is an emoji (all emojis universally compatible at https://emojipedia.org/)
