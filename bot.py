@@ -23,7 +23,7 @@ class TestCog(commands.Cog):
         message = await channel.fetch_message(payload.message_id)  # get message id from payload
         embed = message.embeds[0]  # get the embed from the message
 
-        if embed.footer.text == "HELP_DESK":  # NOTE TO SELF: CHECK THIS LINE
+        if embed.footer.text[0:9] == "HELP_DESK":  # NOTE TO SELF: CHECK THIS LINE
             await reaction_add.create_help_channel(self, payload, bot)
         elif embed.footer.text == "DELETE_HELP_CHANNEL":
             await reaction_add.delete_help_channel(self, payload, bot)
