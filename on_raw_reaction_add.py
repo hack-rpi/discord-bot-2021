@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import json
+import pytz
 
 
 async def create_help_channel(self, payload, bot):
@@ -66,8 +67,51 @@ async def create_help_channel(self, payload, bot):
 
         await msg.add_reaction("🔒")
 
+async def chat_history(channel, payload, bot):
+    users = set()
+    with open(f"{channel.name}.html", "w") as file:
+        async for message in channel.history(oldest_first = True):
+            # Adjust time for daylight savings
+            timeZone = pytz.timezone("US/Eastern")
+            if timeZone.dst == 0:
+                adjustment = -5
+            else:
+                adjustment = -4
+
+            # Generate timestamp
+            hour = str(message.created_at.hour + adjustment)
+            if int(hour) < 0: hour = str(12 + adjustment)
+            if int(hour) == 0: hour = "12"
+
+            minute = str(message.created_at.minute)
+            if int(minute) < 10: minute = "0" + str(minute)
+
+            second = str(message.created_at.second)
+            if int(second) < 10: second = "0" + str(second)
+
+            time = hour + ":" + minute + ":" + second
+
+            user = message.author
+            users.add(user)
+
+            if str(message.content) != "":  # Append message to transcript
+                file.write("[" + time + "] " + str(message.author) + ":    " + str(message.content) + "<br>")
+    file.close()
+
+    tracker_channel = bot.get_channel(843289182344183869)  # Hard-code the administrator channel ID into this operation
+
+    if len(users) > 0:
+        await tracker_channel.send(channel.name, file=discord.File(f"{channel.name}.html"))
+        for user in users:
+            if not user.bot :
+                print(f"Closing channel {channel.name}, send to {user.name, user.id}")
+                await user.send(f"Hey {user.name}! Here's a record of your conversation in {channel.name}.", file=discord.File(f"{channel.name}.html"))
+    else:
+        await tracker_channel.send(f"{channel.name} was closed with no conversation.")
 
 async def delete_help_channel(self, payload, bot):
+    channel = bot.get_channel(payload.channel_id)
+    await chat_history(channel, payload, bot)  # Generate and send transcript
     user = await self.bot.fetch_user(payload.user_id)
     if user != bot.user:
         channel = bot.get_channel(payload.channel_id)  # get channel id from payload
