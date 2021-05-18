@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import base64_encoding as b64
 import json
 
 
@@ -17,9 +18,11 @@ async def create_help_channel(self, payload, bot):
         channel = bot.get_channel(payload.channel_id)  # get channel id from payload
         message = await channel.fetch_message(payload.message_id)  # get message id from payload
         embed = message.embeds[0]
+        encodedMessage = embed.footer.text
+        footer = b64.decode(encodedMessage)
         ticketNumber = 0
-        if len(embed.footer.text[10:]) != 0:
-            ticketNumber = int(embed.footer.text[10:])
+        if len(footer[10:]) != 0:
+            ticketNumber = int(footer[10:])
         ticketNumber += 1
 
 
@@ -64,18 +67,19 @@ async def create_help_channel(self, payload, bot):
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         ticketEmbed.set_thumbnail(url="attachment://f20logo.png")
         # set footer
-        ticketEmbed.set_footer(text="DELETE_HELP_CHANNEL")  # add category to embed footer
+        ticketEmbed.set_footer(text=b64.encode("DELETE_HELP_CHANNEL"))  # add category to embed footer
         channel = discord.utils.get(guild.channels, name="ticket-{:04d}".format(ticketNumber))
         channel_id = channel.id
         channel = bot.get_channel(channel_id)
         ticketMessage = await channel.send(file=file, embed=ticketEmbed)
         await ticketMessage.add_reaction("🔒")
 
-        newFooter = embed.footer.text[:9] + "_{:02d}".format(ticketNumber)
+        temp = footer[:9] + "_{:02d}".format(ticketNumber)
+        newFooter = b64.encode(temp)
         newHelpDeskEmbed = discord.Embed(title=embed.title, description=embed.description, color=embed.color)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         newHelpDeskEmbed.set_thumbnail(url="attachment://f20logo.png")
-        # newHelpDeskEmbed.set_thumbnail(url=embed.thumbnail.url)
+        # HelpDeskEmbed.set_thumbnail(url=embed.thumbnail.url)
         newHelpDeskEmbed.set_footer(text=newFooter)
         await message.edit(embed=newHelpDeskEmbed)
 
