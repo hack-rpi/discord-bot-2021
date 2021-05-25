@@ -4,7 +4,7 @@ import base64_encoding as b64
 import json
 
 
-async def create_help_channel(self, payload, bot):
+async def create_help_channel(self, payload, bot): 
     user = await self.bot.fetch_user(payload.user_id)
     if user != bot.user:
         print("Channel created for {}".format(user.name))  # await ctx.send
@@ -17,14 +17,21 @@ async def create_help_channel(self, payload, bot):
         # ticketNumber += 1
         channel = bot.get_channel(payload.channel_id)  # get channel id from payload
         message = await channel.fetch_message(payload.message_id)  # get message id from payload
-        embed = message.embeds[0]
+        embed = message.embeds[0] 
         encodedMessage = embed.footer.text
         footer = b64.decode(encodedMessage)
-        ticketNumber = 0
-        if len(footer[10:]) != 0:
-            ticketNumber = int(footer[10:])
-        ticketNumber += 1
+        
+        print("decodedMessage: ", footer)
 
+        # split and parse footer by semi colon (;)
+        category_name, custom_ticket_name, ticketNum = footer.split(';')
+        # elements[0] = category_name    elements[1] = custom ticket name    elements[2] = ticket 
+
+        currentFooterNum = ticketNum 
+        ticketNumber = 0 
+        if len(currentFooterNum) != 0:
+            ticketNumber = int(currentFooterNum)
+        ticketNumber += 1
 
         guild = self.bot.get_guild(payload.guild_id)
 
@@ -43,9 +50,13 @@ async def create_help_channel(self, payload, bot):
 
         category = discord.utils.get(guild.categories, name=name)
         categoryFin = category  # stops channels from going public
-        # !creates channel inside of category
-        print("ticket-{:04d}".format(ticketNumber))
-        await guild.create_text_channel("ticket-{:04d}".format(ticketNumber), category=categoryFin,
+        # !creates channel inside of category    
+ 
+        # print("first: ", currentName+"-{:04d}".format(ticketNumber)) 
+
+        currentName = custom_ticket_name
+
+        await guild.create_text_channel("{}-{:04d}".format(currentName, ticketNumber), category=categoryFin,
                                         overwrites=overwrites)
 
         # remove emoji after channel creation:
@@ -67,14 +78,22 @@ async def create_help_channel(self, payload, bot):
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         ticketEmbed.set_thumbnail(url="attachment://f20logo.png")
         # set footer
-        ticketEmbed.set_footer(text=b64.encode("DELETE_HELP_CHANNEL"))  # add category to embed footer
-        channel = discord.utils.get(guild.channels, name="ticket-{:04d}".format(ticketNumber))
+        ticketEmbed.set_footer(text=b64.encode("DELETE_HELP_CHANNEL"))  # add category to embed footer 
+ 
+        #!imp print test
+        print("footer before second pull:\n",footer)
+        # print("second: ", currentName+"-{:04d}".format(ticketNumber))  
+        channel = discord.utils.get(guild.channels, name="{}-{:04d}".format(currentName, ticketNumber))
+
+        print("channel", channel)
         channel_id = channel.id
         channel = bot.get_channel(channel_id)
         ticketMessage = await channel.send(file=file, embed=ticketEmbed)
         await ticketMessage.add_reaction("🔒")
 
-        temp = footer[:9] + "_{:02d}".format(ticketNumber)
+        strng = category_name + ';' + custom_ticket_name + ';'
+
+        temp = strng + "{:02d}".format(ticketNumber)
         newFooter = b64.encode(temp)
         newHelpDeskEmbed = discord.Embed(title=embed.title, description=embed.description, color=embed.color)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")

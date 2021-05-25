@@ -48,14 +48,16 @@ class TestCog(commands.Cog):
         # EMBED MESSAGE
 
     @commands.command()
-    async def embed(self, ctx, channelCategory, userReaction, *, text):
+    async def embed(self, ctx, channelCategory, customTicket, userReaction, *, text):
         await ctx.message.delete()  # immediately deletes original command from chat
         # for customized title, create argument for title, and pass argument into title= 
         embed = discord.Embed(title="HackRPI Help Desk", url="https://hackrpi.com/", description=text, color=0x8E2D25)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         embed.set_thumbnail(url="attachment://f20logo.png")
         # set footer
-        embed.set_footer(text=b64.encode(channelCategory))  # add category to embed footer
+        print(customTicket)
+        strng = channelCategory + ";" + customTicket + ";"
+        embed.set_footer(text=b64.encode(strng))  # add category to embed footer
         msg = await ctx.send(file=file, embed=embed)
 
         await msg.add_reaction(userReaction)
