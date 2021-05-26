@@ -54,9 +54,8 @@ async def create_help_channel(self, payload, bot):
  
         # print("first: ", currentName+"-{:04d}".format(ticketNumber)) 
 
-        currentName = custom_ticket_name
-
-        await guild.create_text_channel("{}-{:04d}".format(currentName, ticketNumber), category=categoryFin,
+        currentName = custom_ticket_name 
+        newChannel = await guild.create_text_channel("{}-{:04d}".format(currentName, ticketNumber), category=categoryFin,
                                         overwrites=overwrites)
 
         # remove emoji after channel creation:
@@ -80,11 +79,11 @@ async def create_help_channel(self, payload, bot):
         # set footer
         ticketEmbed.set_footer(text=b64.encode("DELETE_HELP_CHANNEL"))  # add category to embed footer 
  
-        #!imp print test
-        print("footer before second pull:\n",footer)
-        # print("second: ", currentName+"-{:04d}".format(ticketNumber))  
-        channel = discord.utils.get(guild.channels, name="{}-{:04d}".format(currentName, ticketNumber))
+        #!imp print test 
+        currentName = custom_ticket_name  
+        # channel = discord.utils.get(guild.channels, name=newChannel) //original
 
+        channel= newChannel
         print("channel", channel)
         channel_id = channel.id
         channel = bot.get_channel(channel_id)
