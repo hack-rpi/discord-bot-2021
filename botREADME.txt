@@ -1,21 +1,21 @@
 Scope and Concept: 
 
-LATEST: 4/19 Task:
+4/19 Tasks:
     1. Add ticket counter to each embed footer
-        Store counter in general (envelope) embed footer 
-    2. Including the option for a custom name 
-    add IBM optional argument before embed description: 
-         /embed HELP_DESK :envelope_with_arrow: IBM Any questions? React with :envelope_with_arrow: to get them answered! 
+        Store counter in general (envelope) embed footer
+    2. Including the option for a custom name
+    add IBM optional argument before embed description:
+         /embed HELP_DESK :envelope_with_arrow: IBM Any questions? React with :envelope_with_arrow: to get them answered!
     Rather than only having ticket-1:
       Ticket-2
       IBM-2
       TroyWeb-4
-    3. Embed ticket counter into the message (embed) footer 
+    3. Embed ticket counter into the message (embed) footer
         Parse, Update (increment) ticket count in the embed footer
-    4. When a channel is deleted, send a HTML message to the user with the channel contents 
+    4. When a channel is deleted, send a HTML message to the user with the channel contents
         In the future: Send HTML channel contents to HackRPI admin channel
 
-4/5 Task: COMPLETE by Charles (4/17)
+4/5 Task: COMPLETE by Charles
     Test case:  /embed HELP_DESK :envelope_with_arrow: Any questions? React with :envelope_with_arrow: to get them answered!
     
     Within the user's new channel, create an embed with a reaction

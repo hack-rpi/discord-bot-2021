@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 from discord.ext import commands
 import json
 import on_raw_reaction_add as reaction_add
+import base64_encoding as b64
+
+# Useful website: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
 
 load_dotenv()
 
@@ -25,9 +28,9 @@ class TestCog(commands.Cog):
         message = await channel.fetch_message(payload.message_id)  # get message id from payload
         embed = message.embeds[0]  # get the embed from the message
 
-        if embed.footer.text == "HELP_DESK":  # NOTE TO SELF: CHECK THIS LINE
+        if b64.decode(embed.footer.text)[0:9] == "HELP_DESK":  # NOTE TO SELF: CHECK THIS LINE
             await reaction_add.create_help_channel(self, payload, bot)
-        elif embed.footer.text == "DELETE_HELP_CHANNEL":
+        elif b64.decode(embed.footer.text) == "DELETE_HELP_CHANNEL":
             await reaction_add.delete_help_channel(self, payload, bot)
 
     # end of on_raw_reaction_add
@@ -47,14 +50,16 @@ class TestCog(commands.Cog):
         # EMBED MESSAGE
 
     @commands.command()
-    async def embed(self, ctx, channelCategory, userReaction, *, text):
+    async def embed(self, ctx, channelCategory, customTicket, userReaction, *, text):
         await ctx.message.delete()  # immediately deletes original command from chat
         # for customized title, create argument for title, and pass argument into title= 
         embed = discord.Embed(title="HackRPI Help Desk", url="https://hackrpi.com/", description=text, color=0x8E2D25)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         embed.set_thumbnail(url="attachment://f20logo.png")
         # set footer
-        embed.set_footer(text=channelCategory)  # add category to embed footer
+        print(customTicket)
+        strng = channelCategory + ";" + customTicket + ";"
+        embed.set_footer(text=b64.encode(strng))  # add category to embed footer
         msg = await ctx.send(file=file, embed=embed)
 
         await msg.add_reaction(userReaction)
@@ -63,7 +68,7 @@ class TestCog(commands.Cog):
         found = False
         for category in ctx.message.guild.categories:
             channelCategory.replace("_", " ")
-            if (channelCategory == category):
+            if channelCategory == category:
                 found = True
                 print(found)
                 break
@@ -76,7 +81,7 @@ class TestCog(commands.Cog):
         # creates guild
         guild = ctx.message.guild
 
-        if (not found):
+        if not found:
             # await - execute category creation 
             await ctx.guild.create_category(name)
             print('category created')
