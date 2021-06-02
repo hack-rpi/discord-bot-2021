@@ -10,10 +10,6 @@ import base64_encoding as b64
 
 load_dotenv()
 
-global globalReaction
-global globalChannelCategory
-
-
 class TestCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -24,58 +20,52 @@ class TestCog(commands.Cog):
     async def on_raw_reaction_add(self, payload):  # called when a user reacts
         if payload.user_id == bot.user.id:  # Prevent the chat log from being sent to the admin channel before deletion
             return
+
+        #TODO: check to see the message is from the bot and it is actually an embed message
         channel = bot.get_channel(payload.channel_id)  # get channel id from payload
         message = await channel.fetch_message(payload.message_id)  # get message id from payload
         embed = message.embeds[0]  # get the embed from the message
+        footer = b64.decode(embed.footer.text)
 
-        if b64.decode(embed.footer.text)[0:9] == "HELP_DESK":  # NOTE TO SELF: CHECK THIS LINE
+        # searches footer["type"] for channel type (help / sponsor specific / delete)
+        if footer["type"] == "HELP_DESK": 
             await reaction_add.create_help_channel(self, payload, bot)
-        elif b64.decode(embed.footer.text) == "DELETE_HELP_CHANNEL":
+        elif footer["type"] == "DELETE_HELP_CHANNEL":
             await reaction_add.delete_help_channel(self, payload, bot)
 
-    # end of on_raw_reaction_add
-
-    # REGULAR CHANNEL MESSAGE
+    #TODO: protect this command with a role so that a random user cannot invoke it
+    #TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
     @commands.command()
-    #  takes arguments self = /create, ctx = default channel (no user input)
-    #  channelCategory = channel category, reaction = emoji reaction, 
-    #  text = user's paragraph text
-    async def create(self, ctx, channelCategory, reaction, *, text):
-        msg = await ctx.send(text)
-        # .add_reaction adds reaction to msg
-        # test case -> emoji = '👍' 
-        await msg.add_reaction(reaction)
-        print("success:  emoji added")
-
-        # EMBED MESSAGE
-
-    @commands.command()
-    async def embed(self, ctx, channelCategory, customTicket, userReaction, *, text):
+    async def embed(self, ctx, channel_category, channel_name, custom_ticket, user_reaction, *, text):
         await ctx.message.delete()  # immediately deletes original command from chat
         # for customized title, create argument for title, and pass argument into title= 
         embed = discord.Embed(title="HackRPI Help Desk", url="https://hackrpi.com/", description=text, color=0x8E2D25)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         embed.set_thumbnail(url="attachment://f20logo.png")
-        # set footer
-        print(customTicket)
-        strng = channelCategory + ";" + customTicket + ";"
-        embed.set_footer(text=b64.encode(strng))  # add category to embed footer
+        # set footer 
+        footer = dict()
+        footer["category"] = channel_category
+        footer["channel_name"] = channel_name
+        footer["custom_ticket"] = custom_ticket
+        footer["ticket_num"] = 0
+        footer["type"] = "HELP_DESK"
+        
+        # embed.set_footer(text=b64.encode(footer))  # add category to embed footer
         msg = await ctx.send(file=file, embed=embed)
 
-        await msg.add_reaction(userReaction)
+        await msg.add_reaction(user_reaction)
 
         # ! checks for existing category 
         found = False
         for category in ctx.message.guild.categories:
-            channelCategory.replace("_", " ")
-            if channelCategory == category:
-                found = True
-                print(found)
+            channel_category.replace("_", " ")
+            if channel_category == category:
+                found = True 
                 break
 
         # creates category on embed message send
         # channel name
-        name = channelCategory
+        name = channel_category
         # sets category name from command argument
         category = discord.utils.get(ctx.guild.categories, name=name)
         # creates guild
@@ -83,8 +73,7 @@ class TestCog(commands.Cog):
 
         if not found:
             # await - execute category creation 
-            await ctx.guild.create_category(name)
-            print('category created')
+            await ctx.guild.create_category(name) 
         # end of object
 
 
