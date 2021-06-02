@@ -19,6 +19,8 @@ class TestCog(commands.Cog):
     # !on reaction
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):  # called when a user reacts
+        if payload.user_id == bot.user.id:  # Prevent the chat log from being sent to the admin channel before deletion
+            return
         channel = bot.get_channel(payload.channel_id)  # get channel id from payload
         message = await channel.fetch_message(payload.message_id)  # get message id from payload
         embed = message.embeds[0]  # get the embed from the message
