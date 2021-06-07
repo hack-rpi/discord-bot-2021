@@ -39,7 +39,7 @@ async def create_help_channel(self, payload, bot):
 
         # create private ticket text channel  #!imp - hard coded category name
 
-        category = discord.utils.get(guild.categories, name=name)
+        category = discord.utils.get(guild.categories, name=category_name)
         category_final = category  # stops channels from going public
         # !creates channel inside of category    
 
@@ -85,9 +85,9 @@ async def create_help_channel(self, payload, bot):
         # temp = strng + "{:02d}".format(ticket_num)
         
         new_help_desk_embed = discord.Embed(title=embed.title, description=embed.description, color=embed.color)
-        # file = discord.File("assets/f20logo.png", filename="f20logo.png")
-        # new_help_desk_embed.set_thumbnail(url="attachment://f20logo.png")
-        new_help_desk_embed.set_thumbnail(url=embed.thumbnail.url)
+        file = discord.File("assets/f20logo.png", filename="f20logo.png")
+        new_help_desk_embed.set_thumbnail(url="attachment://f20logo.png")
+        # new_help_desk_embed.set_thumbnail(url=embed.thumbnail.url)
         new_help_desk_embed.set_footer(text=new_footer_string)
         await message.edit(embed=new_help_desk_embed)
 
@@ -103,12 +103,15 @@ async def chat_history(channel, payload, bot):
 
             # Generate timestamp
             hour = int(message.created_at.hour + adjustment)
-            if hour < 0: hour = str(24 + hour)
+            if hour < 0:
+                hour = str(24 + hour)
             minute = str(message.created_at.minute)
-            if int(minute) < 10: minute = "0" + str(minute)
+            if int(minute) < 10:
+                minute = "0" + str(minute)
             second = str(message.created_at.second)
-            if int(second) < 10: second = "0" + str(second)
-            time = hour + ":" + minute + ":" + second
+            if int(second) < 10:
+                second = "0" + str(second)
+            time = str(hour) + ":" + str(minute) + ":" + str(second)
 
             # Retrieve author username
             user = message.author

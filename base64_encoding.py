@@ -36,9 +36,11 @@ def add_blank_spaces(footer_string):
 
 # Removes blank spaces because Discord is stupid and can't handle footers properly
 def remove_blank_spaces(footer_string):
-    blank_space = "\u200B"
-    lis = footer_string.split(blank_space)
-    new_footer_string = ""
-    for s in lis:
-        new_footer_string += s
-    return new_footer_string
+    if footer_string.count("\u200B") > 0:
+        blank_space = "\u200B"
+        lis = footer_string.split(blank_space)
+        new_footer_string = ""
+        for s in lis:
+            new_footer_string += s
+        return new_footer_string
+    return footer_string
