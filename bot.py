@@ -35,20 +35,20 @@ class TestCog(commands.Cog):
             elif footer["type"] == "DELETE_HELP_CHANNEL":
                 await reaction_add.delete_help_channel(self, payload, bot)
 
-    #TODO: protect this command with a role so that a random user cannot invoke it
     #TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
     @commands.command()
-    @commands.has_role('admin')
-    async def embed(self, ctx, channel_category, channel_name, custom_ticket, user_reaction, *, text):
+    #TODO: use a role by ID from the .env file
+    @commands.has_role("admin")
+    async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *, text): # asterisk allows for paragraph input
         await ctx.message.delete()  # immediately deletes original command from chat
         # for customized title, create argument for title, and pass argument into title= 
         embed = discord.Embed(title="HackRPI Help Desk", url="https://hackrpi.com/", description=text, color=0x8E2D25)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         embed.set_thumbnail(url="attachment://f20logo.png")
+
         # set footer 
         footer = dict()
         footer["category"] = channel_category
-        footer["channel_name"] = channel_name
         footer["custom_ticket"] = custom_ticket
         footer["ticket_num"] = 0
         footer["type"] = "HELP_DESK"
@@ -79,6 +79,24 @@ class TestCog(commands.Cog):
             await ctx.guild.create_category(name) 
         # end of object
 
+    # @embed.error
+    async def embed_error(self, ctx, error):
+        if isinstance(error, commands.errors.MissingRequiredArgument):
+            await ctx.send("Invalid usage: /embed ") # Finish this line
+        else:
+            await ctx.send("Something went wrong")
+
+    @commands.command
+    @commands.has_role("admin")
+    async def help(self, ctx):
+        description = """Embed Creation Command
+        /embed <channel category name> <channel header> <reaction emoji> <description in initial embed>
+        Note: the first two parameters must be one word, or have zero spaces; the third parameter must
+        be a valid emoji; the last parameter can be however long you want it to be"""
+        embed = discord.Embed(title="Admin Commands Help", url="https://hackrpi.com/",
+            description="A representative will be with you shortly. If your case can be closed, react to this message with the :lock: emoji, and the channel will be deleted.",
+            color=0x8E2D25)
+        await ctx.send(embed=embed)
 
 # driver
 bot = commands.Bot(command_prefix='/', description='Test bot')

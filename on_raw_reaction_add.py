@@ -20,7 +20,6 @@ async def create_help_channel(self, payload, bot):
         category_name = footer["category"]
         custom_ticket_name = footer["custom_ticket"]
         ticket_num = footer["ticket_num"]
-        name = footer["channel_name"]
 
         # category_name, custom_ticket_name, ticketNum = footer.split(';')
         # elements[0] = category_name    elements[1] = custom ticket name    elements[2] = ticket 
