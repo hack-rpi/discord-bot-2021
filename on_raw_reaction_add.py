@@ -39,11 +39,9 @@ async def create_help_channel(self, payload, bot):
         # create private ticket text channel  #!imp - hard coded category name
 
         category = discord.utils.get(guild.categories, name=category_name)
-        category_final = category  # stops channels from going public
         # !creates channel inside of category    
 
-        current_name = custom_ticket_name 
-        new_channel = await guild.create_text_channel("{}-{:04d}".format(current_name, ticket_num), category=category_final,
+        new_channel = await guild.create_text_channel("{}-{:04d}".format(custom_ticket_name, ticket_num), category=category,
                                         overwrites=overwrites)
 
         # remove emoji after channel creation:
@@ -67,7 +65,6 @@ async def create_help_channel(self, payload, bot):
         ticket_embed.set_footer(text=delete_footer_string)
         # ticketEmbed.set_footer(text=b64.encode("DELETE_HELP_CHANNEL"))  # add category to embed footer 
  
-        current_name = custom_ticket_name  
         # channel = discord.utils.get(guild.channels, name=newChannel) //original
 
         channel = new_channel

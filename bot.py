@@ -35,6 +35,7 @@ class TestCog(commands.Cog):
             elif footer["type"] == "DELETE_HELP_CHANNEL":
                 await reaction_add.delete_help_channel(self, payload, bot)
 
+    #TODO: potentially look into being able to edit the description for the created ticket section
     #TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
     @commands.command()
     #TODO: use a role by ID from the .env file
@@ -42,6 +43,7 @@ class TestCog(commands.Cog):
     async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *, text): # asterisk allows for paragraph input
         await ctx.message.delete()  # immediately deletes original command from chat
         # for customized title, create argument for title, and pass argument into title= 
+        # TODO: support other logos/URLs (probably an uploaded file with the embed command?)
         embed = discord.Embed(title="HackRPI Help Desk", url="https://hackrpi.com/", description=text, color=0x8E2D25)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         embed.set_thumbnail(url="attachment://f20logo.png")
@@ -53,6 +55,8 @@ class TestCog(commands.Cog):
         footer["ticket_num"] = 0
         footer["type"] = "HELP_DESK"
         
+        #TODO: error checking parameters passed in
+
         embed.set_footer(text=b64.encode(footer))  # add category to embed footer
         msg = await ctx.send(file=file, embed=embed)
 
@@ -80,6 +84,7 @@ class TestCog(commands.Cog):
         # end of object
 
     # @embed.error
+    # TODO: more specific errors with /embed command (assuming an admin ran the command only)
     async def embed_error(self, ctx, error):
         if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send("Invalid usage: /embed ") # Finish this line
