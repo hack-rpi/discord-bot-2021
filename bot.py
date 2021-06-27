@@ -5,6 +5,7 @@ from discord.ext import commands
 import json
 import on_raw_reaction_add as reaction_add
 import base64_encoding as b64
+import error_checking as err
 
 # Useful website: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
 
@@ -41,6 +42,9 @@ class TestCog(commands.Cog):
     #TODO: use a role by ID from the .env file
     @commands.has_role("admin")
     async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *, text): # asterisk allows for paragraph input
+        if not err.embed_error_check(channel_category, custom_ticket, user_reaction, text):
+            raise ValueError("Invalid input to embed() command")
+
         await ctx.message.delete()  # immediately deletes original command from chat
         # for customized title, create argument for title, and pass argument into title= 
         # TODO: support other logos/URLs (probably an uploaded file with the embed command?)
@@ -83,13 +87,13 @@ class TestCog(commands.Cog):
             await ctx.guild.create_category(name) 
         # end of object
 
-    # @embed.error
+    @embed.error
     # TODO: more specific errors with /embed command (assuming an admin ran the command only)
     async def embed_error(self, ctx, error):
         if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send("Invalid usage: /embed ") # Finish this line
         else:
-            await ctx.send("Something went wrong")
+            await ctx.send(str(error))
 
     @commands.command
     @commands.has_role("admin")
