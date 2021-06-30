@@ -22,19 +22,20 @@ def check_emoji(_emoji, bot):
 
 
 def embed_error_check(channel_category, custom_ticket, user_reaction, text, bot):
-    channel_string = isinstance(channel_category, str)
-    ticket_string = isinstance(custom_ticket, str)
-    text_string = isinstance(text, str)
-
     is_emoji, emoji_response = check_emoji(user_reaction, bot)
+    if is_emoji:
+        msg = "Invalid emoji entered to the embed() command: \"" + user_reaction + \
+              "\". Please choose a different emoji."
+        raise ValueError(msg)
 
-    if not channel_string:
-        return True, "channel string"
-    elif not ticket_string:
-        return True, "ticket string"
-    elif not text_string:
-        return True, "text string"
-    elif not is_emoji:
-        return True, "emoji"
-    else:  # No errors
-        return False, ""
+    returned_error = "NO_ERROR"
+    if not isinstance(channel_category, str):
+        returned_error = "channel string"
+    elif not isinstance(custom_ticket, str):
+        returned_error = True, "ticket string"
+    elif not isinstance(text, str):
+        returned_error = True, "text string"
+
+    if returned_error != "NO_ERROR":
+        raise ValueError(f"Invalid input to embed() command for the {returned_error}.")
+
