@@ -21,16 +21,15 @@ class TestCog(commands.Cog):
     async def on_raw_reaction_add(self, payload):  # called when a user reacts
         if payload.user_id == bot.user.id:  # Prevent the chat log from being sent to the admin channel before deletion
             return
-        #TODO: check to see the message is from the bot and it is actually an embed message
         channel = bot.get_channel(payload.channel_id)  # get channel id from payload
         message = await channel.fetch_message(payload.message_id)  # get message id from payload
 
         if len(message.embeds) != 0 and message.author.id == bot.user.id:
             embed = message.embeds[0]  # get the embed from the message
-
             footer = b64.decode(embed.footer.text)
 
-            # searches footer["type"] for channel type (help / sponsor specific / delete)
+            # Searches footer["type"] for channel type (help / sponsor specific / delete)
+            # Check to see the message is from the bot and it is actually an embed message
             if footer["type"] == "HELP_DESK":
                 await reaction_add.create_help_channel(self, payload, bot)
             elif footer["type"] == "DELETE_HELP_CHANNEL":
@@ -42,50 +41,60 @@ class TestCog(commands.Cog):
     #TODO: use a role by ID from the .env file
     @commands.has_role("admin")
     async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *, text): # asterisk allows for paragraph input
-        if not err.embed_error_check(channel_category, custom_ticket, user_reaction, text):
-            raise ValueError("Invalid input to embed() command")
+        error_detected, returned_error = err.embed_error_check(channel_category, custom_ticket, user_reaction, text, bot)
+        if error_detected:
+            if returned_error == "channel string" or returned_error == "ticket string" or returned_error == "text string":
+                await ctx.message.delete()  # immediately deletes original command from chat
+                raise ValueError(f"Invalid input to embed() command for the {returned_error}.")
+            elif returned_error == "emoji":
+                await ctx.message.delete()  # immediately deletes original command from chat
+                msg = "Invalid emoji entered to the embed() command: \"" + user_reaction + \
+                      "\". Please choose a different emoji."
+                raise ValueError(msg)
 
-        await ctx.message.delete()  # immediately deletes original command from chat
-        # for customized title, create argument for title, and pass argument into title= 
-        # TODO: support other logos/URLs (probably an uploaded file with the embed command?)
-        embed = discord.Embed(title="HackRPI Help Desk", url="https://hackrpi.com/", description=text, color=0x8E2D25)
-        file = discord.File("assets/f20logo.png", filename="f20logo.png")
-        embed.set_thumbnail(url="attachment://f20logo.png")
+        else:
+            await ctx.message.delete()  # immediately deletes original command from chat
+            # for customized title, create argument for title, and pass argument into title=
+            # TODO: support other logos/URLs (probably an uploaded file with the embed command?)
+            embed = discord.Embed(title="HackRPI Help Desk", url="https://hackrpi.com/", description=text, color=0x8E2D25)
+            file = discord.File("assets/f20logo.png", filename="f20logo.png")
+            embed.set_thumbnail(url="attachment://f20logo.png")
 
-        # set footer 
-        footer = dict()
-        footer["category"] = channel_category
-        footer["custom_ticket"] = custom_ticket
-        footer["ticket_num"] = 0
-        footer["type"] = "HELP_DESK"
-        
-        #TODO: error checking parameters passed in
 
-        embed.set_footer(text=b64.encode(footer))  # add category to embed footer
-        msg = await ctx.send(file=file, embed=embed)
+            # set footer
+            footer = dict()
+            footer["category"] = channel_category
+            footer["custom_ticket"] = custom_ticket
+            footer["ticket_num"] = 0
+            footer["type"] = "HELP_DESK"
 
-        await msg.add_reaction(user_reaction)
+            #TODO: error checking parameters passed in
 
-        # ! checks for existing category 
-        found = False
-        for category in ctx.message.guild.categories:
-            channel_category.replace("_", " ")
-            if channel_category == category:
-                found = True
-                break
+            embed.set_footer(text=b64.encode(footer))  # add category to embed footer
+            msg = await ctx.send(file=file, embed=embed)
 
-        # creates category on embed message send
-        # channel name
-        name = channel_category
-        # sets category name from command argument
-        category = discord.utils.get(ctx.guild.categories, name=name)
-        # creates guild
-        guild = ctx.message.guild
+            await msg.add_reaction(user_reaction)
 
-        if not found:
-            # await - execute category creation 
-            await ctx.guild.create_category(name) 
-        # end of object
+            # ! checks for existing category
+            found = False
+            for category in ctx.message.guild.categories:
+                channel_category.replace("_", " ")
+                if channel_category == category:
+                    found = True
+                    break
+
+            # creates category on embed message send
+            # channel name
+            name = channel_category
+            # sets category name from command argument
+            category = discord.utils.get(ctx.guild.categories, name=name)
+            # creates guild
+            guild = ctx.message.guild
+
+            if not found:
+                # await - execute category creation
+                await ctx.guild.create_category(name)
+            # end of object
 
     @embed.error
     # TODO: more specific errors with /embed command (assuming an admin ran the command only)
