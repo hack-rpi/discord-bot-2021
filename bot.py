@@ -58,7 +58,7 @@ class TestCog(commands.Cog):
         footer["ticket_num"] = 0
         footer["type"] = "HELP_DESK"
 
-        #TODO: error checking parameters passed in
+        #TODO: error checking parameters passed in - Jacob
 
         embed.set_footer(text=b64.encode(footer))  # add category to embed footer
         msg = await ctx.send(file=file, embed=embed)
@@ -87,7 +87,7 @@ class TestCog(commands.Cog):
         # end of object
 
     @embed.error
-    # TODO: more specific errors with /embed command (assuming an admin ran the command only)
+    # TODO: more specific errors with /embed command (assuming an admin ran the command only) - Jacob
     async def embed_error(self, ctx, error):
         if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send("Invalid usage: /embed ") # Finish this line
