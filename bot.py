@@ -48,8 +48,10 @@ class TestCog(commands.Cog):
                 raise ValueError(f"Invalid input to embed() command for the {returned_error}.")
             elif returned_error == "emoji":
                 await ctx.message.delete()  # immediately deletes original command from chat
-                raise ValueError(f"Invalid emoji entered to the embed() command: \"{user_reaction}\". "
-                                  f"Please choose a different emoji.")
+                msg = "Invalid emoji entered to the embed() command: \"" + user_reaction + \
+                      "\". Please choose a different emoji."
+                raise ValueError(msg)
+
         else:
             await ctx.message.delete()  # immediately deletes original command from chat
             # for customized title, create argument for title, and pass argument into title=

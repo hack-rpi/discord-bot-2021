@@ -11,12 +11,12 @@ def check_emoji(_emoji, bot):
             for emote in server.emojis:  # Search all emojis in all servers the bot is in
                 if emote.name == emote_name and discord.Emoji.is_usable(emote):
                     # Discord bots have Nitro privs for emojis -- Can use custom emojis from other servers
-                        return True, emote  # Bot is able to use the custom emoji
-        return False, "Incompatible"  # Bot is unable to use the provided emoji
+                    return True, emote  # Bot is able to use the custom emoji
+        return False, "emoji"  # Bot is unable to use the provided emoji
 
     emoji_name = emoji.demojize(_emoji)  # Generate Unicode emoji name
     if emoji_name == _emoji:  # Custom emojis will not demojize
-        return False, "Incompatible"  # Bot is unable to use the provided emoji
+        return False, "emoji"  # Bot is unable to use the provided emoji
     else:  # Unicode emoji detected
         return True, _emoji
 
