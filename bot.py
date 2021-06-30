@@ -45,10 +45,10 @@ class TestCog(commands.Cog):
         if error_detected:
             if returned_error == "channel string" or returned_error == "ticket string" or returned_error == "text string":
                 await ctx.message.delete()  # immediately deletes original command from chat
-                return ValueError(f"Invalid input to embed() command for the {returned_error}.")
+                raise ValueError(f"Invalid input to embed() command for the {returned_error}.")
             elif returned_error == "emoji":
                 await ctx.message.delete()  # immediately deletes original command from chat
-                return ValueError(f"Invalid emoji entered to the embed() command: \"{user_reaction}\". "
+                raise ValueError(f"Invalid emoji entered to the embed() command: \"{user_reaction}\". "
                                   f"Please choose a different emoji.")
         else:
             await ctx.message.delete()  # immediately deletes original command from chat
