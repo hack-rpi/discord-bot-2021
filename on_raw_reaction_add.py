@@ -41,20 +41,27 @@ async def create_help_channel(self, payload, bot):
         category = discord.utils.get(guild.categories, name=category_name)
         # !creates channel inside of category    
 
-        new_channel = await guild.create_text_channel("{}-{:04d}".format(custom_ticket_name, ticket_num), category=category,
-                                        overwrites=overwrites)
+        new_channel = await guild.create_text_channel(
+            "{}-{:04d}".format(custom_ticket_name, ticket_num),
+            category=category,
+            overwrites=overwrites,
+        )
 
         # remove emoji after channel creation:
         await message.remove_reaction(payload.emoji.name, user)  # remove user's emoji reaction
 
-        '''get info from embed footer
+        """Get info from embed footer
            if (footer text = delete_help_channel): delete user channel on reaction
-           if (footer text = help_channel): create user channel (above) on reaction'''
+           if (footer text = help_channel): create user channel (above) on reaction"""
         # !create new embed in user's channel
         # for customized title, create argument for title, and pass argument into title=
-        ticket_embed = discord.Embed(title="We are happy to assist you!", url="https://hackrpi.com/",
-                              description="A representative will be with you shortly. If your case can be closed, react to this message with the :lock: emoji, and the channel will be deleted.",
-                              color=0x8E2D25)
+        ticket_embed = discord.Embed(
+            title="We are happy to assist you!",
+            url="https://hackrpi.com/",
+            description="A representative will be with you shortly. If your case can be closed, "
+                        "react to this message with the :lock: emoji, and the channel will be deleted.",
+            color=0x8E2D25,
+        )
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         ticket_embed.set_thumbnail(url="attachment://f20logo.png")
         # set footer
@@ -64,11 +71,8 @@ async def create_help_channel(self, payload, bot):
         delete_footer_string = b64.encode(delete_footer)
         ticket_embed.set_footer(text=delete_footer_string)
         # ticketEmbed.set_footer(text=b64.encode("DELETE_HELP_CHANNEL"))  # add category to embed footer 
- 
-        # channel = discord.utils.get(guild.channels, name=newChannel) //original
 
         channel = new_channel
-        
         channel_id = channel.id
         channel = bot.get_channel(channel_id)
         ticket_message = await channel.send(file=file, embed=ticket_embed)
@@ -94,8 +98,10 @@ async def chat_history(channel, payload, bot):
         async for message in channel.history(oldest_first=True):
             # Adjust time for daylight savings
             time_zone = pytz.timezone("US/Eastern")
-            if time_zone.dst == 0: adjustment = -5
-            else: adjustment = -4
+            if time_zone.dst == 0:
+                adjustment = -5
+            else:
+                adjustment = -4
 
             # Generate timestamp
             hour = int(message.created_at.hour + adjustment)

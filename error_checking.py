@@ -3,29 +3,25 @@ import emoji
 
 
 def check_emoji(_emoji, bot):
-    custom_emoji = False
     if len(_emoji) > 1 and '<' == _emoji[0] and '>' == _emoji[-1] and ':' in _emoji:  # Custom discord emoji detected
         # Unicode emojis only have ':' no '<' '>'
         emote_name = _emoji.split(':')[1]  # Retrieve the emoji name
         for server in bot.guilds:  # Search all servers the bot is in
             for emote in server.emojis:  # Search all emojis in all servers the bot is in
                 if emote.name == emote_name and discord.Emoji.is_usable(emote):
-                    # Discord bots have Nitro privs for emojis -- Can use custom emojis from other servers
+                    # Discord bots have Nitro privileges for emojis -- Can use custom emojis from other servers
                     return True, emote  # Bot is able to use the custom emoji
         return False, "emoji"  # Bot is unable to use the provided emoji
 
     emoji_name = emoji.demojize(_emoji)  # Generate Unicode emoji name
-    if emoji_name == _emoji:  # Custom emojis will not demojize
-        return False, "emoji"  # Bot is unable to use the provided emoji
-    else:  # Unicode emoji detected
+    if emoji_name is not None:
         return True, _emoji
 
 
 def embed_error_check(channel_category, custom_ticket, user_reaction, text, bot):
     is_emoji, emoji_response = check_emoji(user_reaction, bot)
-    if is_emoji:
-        msg = "Invalid emoji entered to the embed() command: \"" + user_reaction + \
-              "\". Please choose a different emoji."
+    if not is_emoji:
+        msg = f"Invalid emoji entered to the embed() command: \"{user_reaction}\"\n\tPlease choose a different emoji."
         raise ValueError(msg)
 
     returned_error = "NO_ERROR"
