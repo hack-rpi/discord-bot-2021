@@ -14,7 +14,7 @@ def check_emoji(_emoji, bot):
         return False, "emoji"  # Bot is unable to use the provided emoji
 
     emoji_name = emoji.demojize(_emoji)  # Generate Unicode emoji name
-    if emoji_name is not None:
+    if emoji_name != _emoji:  # Checks to make sure a custom emoji hasn't demojized to Unicode
         return True, _emoji
 
 
