@@ -22,7 +22,7 @@ async def create_help_channel(self, payload, bot):
         ticket_num = footer["ticket_num"]
 
         # category_name, custom_ticket_name, ticketNum = footer.split(';')
-        # elements[0] = category_name    elements[1] = custom ticket name    elements[2] = ticket 
+        # elements[0] = category_name  ,  elements[1] = custom ticket name  ,  elements[2] = ticket
 
         ticket_num += 1
 
@@ -37,18 +37,14 @@ async def create_help_channel(self, payload, bot):
         }
 
         # create private ticket text channel  #!imp - hard coded category name
-
-        category = discord.utils.get(guild.categories, name=category_name)
-        # !creates channel inside of category    
-
+        category = discord.utils.get(guild.categories, name=category_name)  # !creates channel inside of category
         new_channel = await guild.create_text_channel(
             "{}-{:04d}".format(custom_ticket_name, ticket_num),
             category=category,
             overwrites=overwrites,
         )
 
-        # remove emoji after channel creation:
-        await message.remove_reaction(payload.emoji.name, user)  # remove user's emoji reaction
+        await message.remove_reaction(payload.emoji.name, user)  # remove user's emoji reaction after channel creation
 
         """Get info from embed footer
            if (footer text = delete_help_channel): delete user channel on reaction
@@ -78,12 +74,10 @@ async def create_help_channel(self, payload, bot):
         ticket_message = await channel.send(file=file, embed=ticket_embed)
         await ticket_message.add_reaction("🔒")
 
-        # strng = category_name + ';' + custom_ticket_name + ';'
         new_footer = footer.copy()
         new_footer["ticket_num"] = ticket_num
-        new_footer_string = b64.encode(new_footer) # this is a string
-        # temp = strng + "{:02d}".format(ticket_num)
-        
+        new_footer_string = b64.encode(new_footer)
+
         new_help_desk_embed = discord.Embed(title=embed.title, description=embed.description, color=embed.color)
         file = discord.File("assets/f20logo.png", filename="f20logo.png")
         new_help_desk_embed.set_thumbnail(url="attachment://f20logo.png")

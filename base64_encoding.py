@@ -19,11 +19,6 @@ def decode(original_code):
     message = message_bytes.decode("ascii")
     return json.loads(message)
 
-# Probably can just delete the below method but leaving it here to be safe for now
-# # Takes in a string or a dictionary and converts it to a json object
-# def convert_to_json(item):
-#     return json.loads(item)
-
 
 # Adds blank spaces because Discord is stupid and can't handle footers properly
 def add_blank_spaces(footer_string):
