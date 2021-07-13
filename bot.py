@@ -6,13 +6,30 @@ import json
 import on_raw_reaction_add as reaction_add
 import base64_encoding as b64
 import error_checking as err
+from discord.utils import get
 
 # Useful website: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
 
 load_dotenv()
 
+# enable on_member_join functionality
+intents = discord.Intents.all()
 
 class TestCog(commands.Cog):
+    
+    #! SERVER VARIABLES HARD CODED FOR DEV. EDIT FOR PROD
+    # Servers
+    MAIN_SERVER = 851849082909753395
+    EXPO_SERVER = 816100854875815956
+ 
+    #Add additional sponsor / HackRPI roles for expo server  
+    EXPO_ATTENDEE_ROLE = 864315465366110238
+    EXPO_JUDGE_ROLE = 864315356083519489
+ 
+    # Main server roles to be retrieved
+    MAIN_ATTENDEE_ROLE = 854181953024819210
+    MAIN_JUDGE_ROLE =  854181884523315200
+    
     def __init__(self, bot):
         self.bot = bot
         print("running")
@@ -183,8 +200,78 @@ class TestCog(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+    # Expo Server helper function for expo channel creation
+    @commands.command()
+    
+    # TODO: use a role by ID from the .env file
+    @commands.has_role("admin")
+    async def expo(self, ctx, category_channel_name, text_channel_name, voice_channel_name, low_bound_num, high_bound_num):
+        #NOTE TEST command: /expo team- team team 1 3
+        await ctx.message.delete()  # immediately deletes original command from chat
+        #TODO: Error check expo arguments
+
+        #! create a set of channels (category with text channel + voice channel)
+        # adds 1 to high_bound to be inclusive
+        for i in range(int(low_bound_num), int(high_bound_num) + 1 ):
+            name = category_channel_name + str(i)
+            # sets category name from command argument
+            category = discord.utils.get(ctx.guild.categories, name=name)
+            # creates guild
+            guild = ctx.message.guild
+
+            new_category = await ctx.guild.create_category(name) 
+        
+            #! creates a role for each of the set of channels
+            # create role
+            team_role = await guild.create_role(name="Team "+str(i))
+
+            # permissions
+            overwrites = {
+            guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            guild.me: discord.PermissionOverwrite(read_messages=True),
+            team_role: discord.PermissionOverwrite(read_messages=True) # !imp adds team permissions 
+            }
+
+            # create text channel
+            await guild.create_text_channel("{}-{}-text".format(text_channel_name, str(i)), category=new_category ,
+                overwrites=overwrites)
+            # create voice channel
+            await guild.create_voice_channel("{}-{}-voice".format(voice_channel_name, str(i)), category=new_category,  
+                overwrites=overwrites) 
+    # end of /expo command
+
+    # Expo server on_member_join
+    async def in_hackrpi(self, member_id): 
+        # get expo server guild
+        guild = self.bot.get_guild(self.EXPO_SERVER) 
+ 
+        # get main HackRPI server guild
+        main_guild = self.bot.get_guild(self.MAIN_SERVER) 
+        MAIN_JUDGES = main_guild.get_role(self.MAIN_JUDGE_ROLE)
+        MAIN_ATTENDEES = main_guild.get_role(self.MAIN_ATTENDEE_ROLE)
+ 
+        #! check main hackrpi server for JUDGE role
+        if any(m.id == member_id for m in MAIN_JUDGES.members):
+            # apply respective role
+            judge_role = guild.get_role(self.EXPO_JUDGE_ROLE)
+            user = guild.get_member(member_id)
+            await user.add_roles(judge_role)
+            #! check main hackrpi server for ATTENDEE role
+        elif any(m.id == member_id for m in MAIN_ATTENDEES.members): 
+            # apply respective role
+            attend_role = guild.get_role(self.EXPO_ATTENDEE_ROLE)
+            user = guild.get_member(member_id)
+            await user.add_roles(attend_role)
+        '''NOTE For additional roles: add constant role ID at top of bot class
+           copy and paste if statement snippet above and edit for Sponsor (Specific) role or HackRPI role''' 
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):  
+        if member.guild.id == self.EXPO_SERVER:
+            await self.in_hackrpi(member.id)
+    # end of on_member_join expo server role assignment
 
 # Driver
-bot = commands.Bot(command_prefix='/', description='Test bot')
+bot = commands.Bot(command_prefix='/', description='Test bot', intents=intents)
 bot.add_cog(TestCog(bot))
 bot.run(os.getenv("BOT_TOKEN"), bot=True, reconnect=True)
