@@ -3,6 +3,7 @@ from discord.ext import commands
 import base64_encoding as b64
 import json
 import pytz
+import os
 
 
 async def create_help_channel(self, payload, bot): 
@@ -126,7 +127,7 @@ async def chat_history(channel, payload, bot):
                 file.write("[" + time + "] " + nickname + ":    " + str(message.content) + "\n")
     file.close()
 
-    tracker_channel = bot.get_channel(843289182344183869)  # Hard-code the administrator channel ID into this operation
+    tracker_channel = bot.get_channel(int(os.getenv("TICKET_TRACKER_CHANNEL")))  # Hard-code the administrator channel ID into this operation
 
     # Send channel transcript
     if len(users) > 0:

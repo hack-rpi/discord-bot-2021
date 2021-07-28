@@ -13,22 +13,23 @@ from discord.utils import get
 load_dotenv()
 
 # enable on_member_join functionality
-intents = discord.Intents.all()
+intents = discord.Intents.default()
+intents.members = True
 
 class TestCog(commands.Cog):
     
     #! SERVER VARIABLES HARD CODED FOR DEV. EDIT FOR PROD
     # Servers
-    MAIN_SERVER = 851849082909753395
-    EXPO_SERVER = 816100854875815956
+    MAIN_SERVER = int(os.getenv("MAIN_SERVER"))
+    EXPO_SERVER = int(os.getenv("EXPO_SERVER"))
  
     #Add additional sponsor / HackRPI roles for expo server  
-    EXPO_ATTENDEE_ROLE = 864315465366110238
-    EXPO_JUDGE_ROLE = 864315356083519489
- 
+    EXPO_ATTENDEE_ROLE = int(os.getenv("EXPO_ATTENDEE_ROLE"))
+    EXPO_JUDGE_ROLE = int(os.getenv("EXPO_JUDGE_ROLE"))
+
     # Main server roles to be retrieved
-    MAIN_ATTENDEE_ROLE = 854181953024819210
-    MAIN_JUDGE_ROLE =  854181884523315200
+    MAIN_ATTENDEE_ROLE = int(os.getenv("MAIN_ATTENDEE_ROLE"))
+    MAIN_JUDGE_ROLE = int(os.getenv("MAIN_JUDGE_ROLE"))
     
     def __init__(self, bot):
         self.bot = bot
@@ -56,8 +57,7 @@ class TestCog(commands.Cog):
     # TODO: potentially look into being able to edit the description for the created ticket section
     # TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
     @commands.command()
-    # TODO: use a role by ID from the .env file
-    @commands.has_role("admin")
+    @commands.has_role(int(os.getenv("MAIN_ADMIN_ROLE")))
     async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *,
                     text):  # asterisk allows for paragraph input
         err.embed_error_check(channel_category, custom_ticket, user_reaction, text, bot)
@@ -180,7 +180,7 @@ class TestCog(commands.Cog):
             )
 
     @commands.command
-    @commands.has_role("admin")
+    @commands.has_role(int(os.getenv("MAIN_ADMIN_ROLE")))
     async def help(self, ctx):
         """
         Embed Creation Command:
@@ -203,8 +203,7 @@ class TestCog(commands.Cog):
     # Expo Server helper function for expo channel creation
     @commands.command()
     
-    # TODO: use a role by ID from the .env file
-    @commands.has_role("admin")
+    @commands.has_role(int(os.getenv("EXPO_ADMIN_ROLE")))
     async def expo(self, ctx, category_channel_name, text_channel_name, voice_channel_name, low_bound_num, high_bound_num):
         #NOTE TEST command: /expo team- team team 1 3
         await ctx.message.delete()  # immediately deletes original command from chat
@@ -214,13 +213,9 @@ class TestCog(commands.Cog):
         # adds 1 to high_bound to be inclusive
         for i in range(int(low_bound_num), int(high_bound_num) + 1 ):
             name = category_channel_name + str(i)
-            # sets category name from command argument
-            category = discord.utils.get(ctx.guild.categories, name=name)
             # creates guild
             guild = ctx.message.guild
 
-            new_category = await ctx.guild.create_category(name) 
-        
             #! creates a role for each of the set of channels
             # create role
             team_role = await guild.create_role(name="Team "+str(i))
@@ -232,6 +227,8 @@ class TestCog(commands.Cog):
             team_role: discord.PermissionOverwrite(read_messages=True) # !imp adds team permissions 
             }
 
+            new_category = await ctx.guild.create_category(name, overwrites=overwrites) 
+            
             # create text channel
             await guild.create_text_channel("{}-{}-text".format(text_channel_name, str(i)), category=new_category ,
                 overwrites=overwrites)
@@ -274,4 +271,4 @@ class TestCog(commands.Cog):
 # Driver
 bot = commands.Bot(command_prefix='/', description='Test bot', intents=intents)
 bot.add_cog(TestCog(bot))
-bot.run(os.getenv("BOT_TOKEN"), bot=True, reconnect=True)
+bot.run(os.getenv("BOT_TOKEN"), reconnect=True)
