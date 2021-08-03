@@ -8,7 +8,6 @@ import buttons
 import base64_encoding as b64
 import error_checking as err
 
-
 load_dotenv()
 debug_mode = True
 
@@ -36,6 +35,29 @@ class TestCog(commands.Cog):
     #             await channel_actions.create_help_channel(self, payload, bot)
     #         elif footer["type"] == "DELETE_HELP_CHANNEL":
     #             await channel_actions.delete_help_channel(self, payload, bot)
+
+    @commands.Cog.listener()
+    async def on_interaction(self, interaction):
+        # Ensures that the interaction was triggered by a button or a drop down menu
+        if interaction.type == discord.InteractionType.component:
+            message = interaction.message
+            if len(message.embeds) != 0 and message.author.id == bot.user.id:
+                embed = message.embeds[0]  # get the embed from the message
+                footer = b64.decode(embed.footer.text)
+
+                # Searches footer["type"] for channel type (help / sponsor specific / delete)
+                # Check to see the message is from the bot and it is actually an embed message
+                if footer["type"] == "HELP_DESK":
+                    await channel_actions.create_help_channel(self, interaction)
+                    interaction_response_embed = discord.Embed(description="A new ticket has been opened for you. "
+                                                                           "Please check your list of channels to find "
+                                                                           "it.")
+                    try:
+                        await interaction.response.send_message(embed=interaction_response_embed, ephemeral=True)
+                    except discord.errors.InteractionResponded:
+                        pass
+                elif footer["type"] == "DELETE_HELP_CHANNEL":
+                    await channel_actions.delete_help_channel(self, interaction)
 
     # TODO: potentially look into being able to edit the description for the created ticket section
     # TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
@@ -140,7 +162,8 @@ class TestCog(commands.Cog):
             # An exception raised when the command invoker lacks admin permissions.
             # https://discordpy.readthedocs.io/en/stable/ext/commands/api.html#discord.ext.commands.CheckFailure
             await ctx.send("Only admin users are permitted to execute embed commands.")
-        elif error.args[0].startswith("Command raised an exception: ValueError: Invalid emoji entered to the embed() command"):
+        elif error.args[0].startswith(
+                "Command raised an exception: ValueError: Invalid emoji entered to the embed() command"):
             await ctx.send(str(error))
         else:
             # Unknown exception raised.

@@ -225,3 +225,7 @@ async def delete_help_channel(self, payload, bot):
     if user != bot.user:
         channel = bot.get_channel(payload.channel_id)  # Get channel id from payload
         await channel.delete()
+
+
+async def useless_method(self):
+    pass
