@@ -8,10 +8,10 @@ import buttons
 import base64_encoding as b64
 import error_checking as err
 
-# Useful website: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
 
 load_dotenv()
 debug_mode = True
+
 
 class TestCog(commands.Cog):
     def __init__(self, bot):
@@ -157,7 +157,7 @@ class TestCog(commands.Cog):
     async def help(self, ctx):
         """
         Embed Creation Command:
-            /embed <channel category name> <channel header> <reaction emoji> <description in initial embed>
+            /embed <channel category name> <channel header> <description in initial embed>
         Note:
             The first two parameters must be one word, or have zero spaces.
             The third parameter must be a valid emoji.

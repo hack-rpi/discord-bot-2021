@@ -13,7 +13,7 @@ class TicketCreationButton(discord.ui.Button["ticket_creation"]):
     def __init__(self):
         super().__init__(label="OPEN TICKET", style=discord.ButtonStyle.blurple, custom_id="ticket_creation_button")
 
-    async def create_ticket(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction):
         await channel_actions.create_help_channel(self, interaction)
 
 

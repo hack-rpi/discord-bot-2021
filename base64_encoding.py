@@ -1,5 +1,6 @@
 import base64
 import json
+# Useful website: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
 
 
 # Takes in a dictionary/array, converts it to json, and encodes it to base64
@@ -18,11 +19,6 @@ def decode(original_code):
     message_bytes = base64.b64decode(base64_bytes)
     message = message_bytes.decode("ascii")
     return json.loads(message)
-
-# Probably can just delete the below method but leaving it here to be safe for now
-# # Takes in a string or a dictionary and converts it to a json object
-# def convert_to_json(item):
-#     return json.loads(item)
 
 
 # Adds blank spaces because Discord is stupid and can't handle footers properly

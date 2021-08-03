@@ -93,25 +93,20 @@ import pytz
 
 
 async def create_help_channel(self, interaction):
-    print("Channel created for {}".format(interaction.user.name))  # await ctx.send
     user = interaction.user
-    # channel = bot.get_channel(payload.channel_id)  # get channel id from payload
+    guild = interaction.guild
     message = interaction.message
     embed = message.embeds[0]
     encoded_message = embed.footer.text
     footer = b64.decode(encoded_message)
 
+    print("Channel created for {}".format(user.name))
+
     # split and parse footer by semi colon (;)
     category_name = footer["category"]
     custom_ticket_name = footer["custom_ticket"]
     ticket_num = footer["ticket_num"]
-
-    # category_name, custom_ticket_name, ticketNum = footer.split(';')
-    # elements[0] = category_name    elements[1] = custom ticket name    elements[2] = ticket
-
     ticket_num += 1
-
-    guild = interaction.guild
 
     # !imp privacy overwrites
     overwrites = {
@@ -120,8 +115,6 @@ async def create_help_channel(self, interaction):
         # admin user permissions (add admin role and set permissions for more helpers)
         user: discord.PermissionOverwrite(read_messages=True)  # !imp adds user permissions
     }
-
-    # create private ticket text channel  #!imp - hard coded category name
 
     category = discord.utils.get(guild.categories, name=category_name)
     # !creates channel inside of category
