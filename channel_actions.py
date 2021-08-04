@@ -119,8 +119,9 @@ async def create_help_channel(self, interaction):
     category = discord.utils.get(guild.categories, name=category_name)
     # !creates channel inside of category
 
+    ticket_name = "{}-{:04d}".format(custom_ticket_name, ticket_num)
     new_channel = await guild.create_text_channel(
-        "{}-{:04d}".format(custom_ticket_name, ticket_num),
+        ticket_name,
         category=category,
         overwrites=overwrites,
     )
@@ -168,6 +169,8 @@ async def create_help_channel(self, interaction):
     # new_help_desk_embed.set_thumbnail(url=embed.thumbnail.url)
     new_help_desk_embed.set_footer(text=new_footer_string)
     await message.edit(embed=new_help_desk_embed)
+
+    return ticket_name
 
 
 async def chat_history(channel, payload, bot):
