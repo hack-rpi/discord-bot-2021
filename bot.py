@@ -14,9 +14,13 @@ debug_mode = True
 
 
 class TestCog(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, parameter_bot):
+        self.bot = parameter_bot
+
+    @commands.Cog.listener()
+    async def on_ready(self):
         print("Running...")
+        self.bot.add_view(buttons.TicketCreationView())
 
     # !on reaction
     # @commands.Cog.listener()

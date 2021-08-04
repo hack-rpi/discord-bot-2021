@@ -4,12 +4,12 @@ import channel_actions
 
 class TicketCreationView(discord.ui.View):
     def __init__(self):
-        super().__init__()
+        super().__init__(timeout=None)
         self.add_item(TicketCreationButton())
         self.add_item(WebsiteButton())
 
 
-class TicketCreationButton(discord.ui.Button["ticket_creation"]):
+class TicketCreationButton(discord.ui.Button):
     def __init__(self):
         super().__init__(label="OPEN TICKET", style=discord.ButtonStyle.blurple, custom_id="ticket_creation_button")
 
@@ -20,6 +20,6 @@ class TicketCreationButton(discord.ui.Button["ticket_creation"]):
         await channel_actions.create_help_channel(self, interaction)
 
 
-class WebsiteButton(discord.ui.Button["website"]):
+class WebsiteButton(discord.ui.Button):
     def __init__(self):
         super().__init__(label="OUR WEBSITE", style=discord.ButtonStyle.url, url="https://hackrpi.com/")
