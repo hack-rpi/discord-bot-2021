@@ -2,6 +2,8 @@
 Vagrantfile
 
 venv/*
+venv2/*
+discord.py/
 
 .env
 .idea/*
