@@ -3,52 +3,49 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 import json
-import channel_actions
-import buttons
+import on_raw_reaction_add as reaction_add
 import base64_encoding as b64
 import error_checking as err
 
+# Useful website: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
 
 load_dotenv()
-debug_mode = True
 
 
 class TestCog(commands.Cog):
-    def __init__(self, parameter_bot):
-        self.bot = parameter_bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print("Running...")
-        self.bot.add_view(buttons.TicketCreationView())
+    def __init__(self, bot):
+        self.bot = bot
+        print("running")
 
     # !on reaction
-    # @commands.Cog.listener()
-    # async def on_raw_reaction_add(self, payload):  # called when a user reacts
-    #     if payload.user_id == bot.user.id:  # Prevent the chat log from being sent to the admin channel before deletion
-    #         return
-    #     channel = bot.get_channel(payload.channel_id)  # get channel id from payload
-    #     message = await channel.fetch_message(payload.message_id)  # get message id from payload
-    #
-    #     if len(message.embeds) != 0 and message.author.id == bot.user.id:
-    #         embed = message.embeds[0]  # get the embed from the message
-    #         footer = b64.decode(embed.footer.text)
-    #
-    #         # Searches footer["type"] for channel type (help / sponsor specific / delete)
-    #         # Check to see the message is from the bot and it is actually an embed message
-    #         if footer["type"] == "HELP_DESK":
-    #             await channel_actions.create_help_channel(self, payload, bot)
-    #         elif footer["type"] == "DELETE_HELP_CHANNEL":
-    #             await channel_actions.delete_help_channel(self, payload, bot)
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):  # called when a user reacts
+        if payload.user_id == bot.user.id:  # Prevent the chat log from being sent to the admin channel before deletion
+            return
+        channel = bot.get_channel(payload.channel_id)  # get channel id from payload
+        message = await channel.fetch_message(payload.message_id)  # get message id from payload
+
+        if len(message.embeds) != 0 and message.author.id == bot.user.id:
+            embed = message.embeds[0]  # get the embed from the message
+            footer = b64.decode(embed.footer.text)
+
+            # Searches footer["type"] for channel type (help / sponsor specific / delete)
+            # Check to see the message is from the bot and it is actually an embed message
+            if footer["type"] == "HELP_DESK":
+                await reaction_add.create_help_channel(self, payload, bot)
+            elif footer["type"] == "DELETE_HELP_CHANNEL":
+                await reaction_add.delete_help_channel(self, payload, bot)
 
     # TODO: potentially look into being able to edit the description for the created ticket section
     # TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
     @commands.command()
     # TODO: use a role by ID from the .env file
     @commands.has_role("admin")
-    async def embed(self, ctx, channel_category, custom_ticket, *, text):  # asterisk allows for paragraph input
-        # err.embed_error_check(channel_category, custom_ticket, user_reaction, text, bot)
+    async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *,
+                    text):  # asterisk allows for paragraph input
+        err.embed_error_check(channel_category, custom_ticket, user_reaction, text, bot)
 
+        await ctx.message.delete()  # immediately deletes original command from chat
         # for customized title, create argument for title, and pass argument into title=
         # TODO: support other logos/URLs (probably an uploaded file with the embed command?)
         embed = discord.Embed(
@@ -70,22 +67,33 @@ class TestCog(commands.Cog):
         # TODO: error checking parameters passed in - Jacob
 
         embed.set_footer(text=b64.encode(footer))  # add category to embed footer
+        msg = await ctx.send(file=file, embed=embed)
 
-        ticket_creation_view = buttons.TicketCreationView()
-        await ctx.send(file=file, embed=embed, view=ticket_creation_view)
+        await msg.add_reaction(user_reaction)
 
-        # Checks if category already exists and creates the category if it doesn't
+        # ! checks for existing category
         found = False
         for category in ctx.message.guild.categories:
-            if str(channel_category) == str(category):
+            channel_category.replace("_", " ")
+            if channel_category == category:
                 found = True
                 break
-        if not found:
-            await ctx.guild.create_category(channel_category)
 
-        await ctx.message.delete()
+        # creates category on embed message send
+        # channel name
+        name = channel_category
+        # sets category name from command argument
+        category = discord.utils.get(ctx.guild.categories, name=name)
+        # creates guild
+        guild = ctx.message.guild
+
+        if not found:
+            # await - execute category creation
+            await ctx.guild.create_category(name)
+        # end of object
 
     @embed.error
+    # TODO: more specific errors with /embed command (assuming an admin ran the command only) - Jacob - COMPLETED
     async def embed_error(self, ctx, error):
         in_message = ctx.message.content
         out_message = f"Invalid usage: '{in_message}'.\n\t"
@@ -153,15 +161,13 @@ class TestCog(commands.Cog):
                 + "THIS IS AN UNKNOWN ERROR! CONTACT THE TECHNICAL TEAM IMMEDIATELY.\n\t"
                   "ERROR: " + str(error)
             )
-        if debug_mode:
-            raise error
 
     @commands.command
     @commands.has_role("admin")
     async def help(self, ctx):
         """
         Embed Creation Command:
-            /embed <channel category name> <channel header> <description in initial embed>
+            /embed <channel category name> <channel header> <reaction emoji> <description in initial embed>
         Note:
             The first two parameters must be one word, or have zero spaces.
             The third parameter must be a valid emoji.
@@ -181,4 +187,4 @@ class TestCog(commands.Cog):
 # Driver
 bot = commands.Bot(command_prefix='/', description='Test bot')
 bot.add_cog(TestCog(bot))
-bot.run(os.getenv("BOT_TOKEN"), reconnect=True)
+bot.run(os.getenv("BOT_TOKEN"), bot=True, reconnect=True)

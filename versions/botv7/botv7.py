@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 import json
-import channel_actions as reaction_add
+import on_raw_reaction_add as reaction_add
 
 load_dotenv()
 

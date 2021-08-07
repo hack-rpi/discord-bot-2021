@@ -1,6 +1,5 @@
 import base64
 import json
-# Useful website: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
 
 
 # Takes in a dictionary/array, converts it to json, and encodes it to base64
