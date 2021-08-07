@@ -66,7 +66,7 @@ class TestCog(commands.Cog):
     @commands.has_role(int(os.getenv("MAIN_ADMIN_ROLE")))
     async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *,
                     text):  # asterisk allows for paragraph input
-        err.embed_error_check(channel_category, custom_ticket, user_reaction, text, bot)
+        # err.embed_error_check(channel_category, custom_ticket, user_reaction, text, bot)
 
         # for customized title, create argument for title, and pass argument into title=
         # TODO: support other logos/URLs (probably an uploaded file with the embed command?)
