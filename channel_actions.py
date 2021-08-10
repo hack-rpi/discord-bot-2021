@@ -3,7 +3,8 @@ from discord.ext import commands
 import base64_encoding as b64
 import json
 import pytz
-
+import buttons
+import os
 
 # async def old_create_help_channel(self, payload, bot):
 #     user = await self.bot.fetch_user(payload.user_id)
@@ -126,6 +127,8 @@ async def create_help_channel(self, interaction):
         overwrites=overwrites,
     )
 
+    channel_id = new_channel.id
+
     # # remove emoji after channel creation:
     # await message.remove_reaction(payload.emoji.name, user)  # remove user's emoji reaction
 
@@ -138,11 +141,15 @@ async def create_help_channel(self, interaction):
         title="We are happy to assist you!",
         url="https://hackrpi.com/",
         description="A representative will be with you shortly. If your case can be closed, "
-                    "react to this message with the :lock: emoji, and the channel will be deleted.",
+                    "press the \"CLOSE TICKET\" button and the channel will be deleted.",
         color=0x8E2D25,
     )
     file = discord.File("assets/f20logo.png", filename="f20logo.png")
     ticket_embed.set_thumbnail(url="attachment://f20logo.png")
+
+    ticket_deletion_view = buttons.TicketDeletionView(channel_id)
+
+
     # set footer
     delete_footer = dict()
     delete_footer["type"] = "DELETE_HELP_CHANNEL"
@@ -154,8 +161,8 @@ async def create_help_channel(self, interaction):
     # channel = new_channel
     # channel_id = channel.id
     # channel = bot.get_channel(channel_id)
-    ticket_message = await new_channel.send(file=file, embed=ticket_embed)
-    await ticket_message.add_reaction("🔒")
+    ticket_message = await new_channel.send(file=file, embed=ticket_embed, view=ticket_deletion_view)
+    # await ticket_message.add_reaction("🔒")
 
     # strng = category_name + ';' + custom_ticket_name + ';'
     new_footer = footer.copy()
@@ -173,7 +180,8 @@ async def create_help_channel(self, interaction):
     return ticket_name
 
 
-async def chat_history(channel, payload, bot):
+# async def chat_history(channel, payload, bot):
+async def chat_history(channel, this_client):
     users = set()
     with open(f"{channel.name}.txt", "w") as file:
         async for message in channel.history(oldest_first=True):
@@ -206,8 +214,8 @@ async def chat_history(channel, payload, bot):
             if str(message.content) != "":
                 file.write("[" + time + "] " + nickname + ":    " + str(message.content) + "\n")
     file.close()
-
-    tracker_channel = bot.get_channel(843289182344183869)  # Hard-code the administrator channel ID into this operation
+    ticket_tracker_id = int(os.getenv("TICKET_TRACKER_CHANNEL"))
+    tracker_channel = this_client.get_channel(ticket_tracker_id)  # Hard-code the administrator channel ID into this operation
 
     # Send channel transcript
     if len(users) > 0:
@@ -221,10 +229,20 @@ async def chat_history(channel, payload, bot):
         await tracker_channel.send(f"{channel.name} was closed with no conversation.")  # Send message to admin channel
 
 
-async def delete_help_channel(self, payload, bot):
-    channel = bot.get_channel(payload.channel_id)
-    await chat_history(channel, payload, bot)  # Generate and send transcript
-    user = await self.bot.fetch_user(payload.user_id)
-    if user != bot.user:
-        channel = bot.get_channel(payload.channel_id)  # Get channel id from payload
-        await channel.delete()
+# async def delete_help_channel(self, payload, bot):
+#     channel = bot.get_channel(payload.channel_id)
+#     await chat_history(channel, payload, bot)  # Generate and send transcript
+#     user = await self.bot.fetch_user(payload.user_id)
+#     if user != bot.user:
+#         channel = bot.get_channel(payload.channel_id)  # Get channel id from payload
+#         await channel.delete()
+
+
+async def delete_help_channel(interaction, channel_id):
+    print("HELLO WORLD")
+    channel = interaction.channel
+    this_client = discord.Client()
+    await chat_history(channel, this_client)
+    await channel.delete()
+
+    # channel = bot.get_channel()

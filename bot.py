@@ -190,8 +190,7 @@ class TestCog(commands.Cog):
             title="Admin Commands Help",
             url="https://hackrpi.com/",
             description="A representative will be with you shortly. If your case can be closed, "
-                        "react to this message with the :lock: emoji, and the channel will be "
-                        "deleted.",
+                        "press the \"CLOSE TICKET\" button and the channel will be deleted.",
             color=0x8E2D25,
         )
         await ctx.send(embed=embed)
@@ -263,6 +262,7 @@ class TestCog(commands.Cog):
         if member.guild.id == self.EXPO_SERVER:
             await self.in_hackrpi(member.id)
     # end of on_member_join expo server role assignment
+
 
 # Driver
 bot = commands.Bot(command_prefix='/', description='Test bot', intents=intents)
