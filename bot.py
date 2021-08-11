@@ -2,13 +2,8 @@ import discord
 import os
 from dotenv import load_dotenv
 from discord.ext import commands
-import json
-import channel_actions
 import buttons
 import base64_encoding as b64
-import error_checking as err
-from discord.utils import get
-
 
 load_dotenv()
 debug_mode = True
@@ -17,21 +12,21 @@ debug_mode = True
 intents = discord.Intents.default()
 intents.members = True
 
+
 class TestCog(commands.Cog):
-    
-    #! SERVER VARIABLES HARD CODED FOR DEV. EDIT FOR PROD
+    # ! SERVER VARIABLES HARD CODED FOR DEV. EDIT FOR PROD
     # Servers
     MAIN_SERVER = int(os.getenv("MAIN_SERVER"))
     EXPO_SERVER = int(os.getenv("EXPO_SERVER"))
- 
-    #Add additional sponsor / HackRPI roles for expo server  
+
+    # Add additional sponsor / HackRPI roles for expo server
     EXPO_ATTENDEE_ROLE = int(os.getenv("EXPO_ATTENDEE_ROLE"))
     EXPO_JUDGE_ROLE = int(os.getenv("EXPO_JUDGE_ROLE"))
 
     # Main server roles to be retrieved
     MAIN_ATTENDEE_ROLE = int(os.getenv("MAIN_ATTENDEE_ROLE"))
     MAIN_JUDGE_ROLE = int(os.getenv("MAIN_JUDGE_ROLE"))
-    
+
     def __init__(self, bot):
         self.bot = bot
         print("Bot started...")
@@ -41,32 +36,12 @@ class TestCog(commands.Cog):
         print("Bot ready...")
         self.bot.add_view(buttons.TicketCreationView(self.bot))
 
-    # !on reaction
-    # @commands.Cog.listener()
-    # async def on_raw_reaction_add(self, payload):  # called when a user reacts
-    #     if payload.user_id == bot.user.id:  # Prevent the chat log from being sent to the admin channel before deletion
-    #         return
-    #     channel = bot.get_channel(payload.channel_id)  # get channel id from payload
-    #     message = await channel.fetch_message(payload.message_id)  # get message id from payload
-    #
-    #     if len(message.embeds) != 0 and message.author.id == bot.user.id:
-    #         embed = message.embeds[0]  # get the embed from the message
-    #         footer = b64.decode(embed.footer.text)
-    #
-    #         # Searches footer["type"] for channel type (help / sponsor specific / delete)
-    #         # Check to see the message is from the bot and it is actually an embed message
-    #         if footer["type"] == "HELP_DESK":
-    #             await channel_actions.create_help_channel(self, payload, bot)
-    #         elif footer["type"] == "DELETE_HELP_CHANNEL":
-    #             await channel_actions.delete_help_channel(self, payload, bot)
-
     # TODO: potentially look into being able to edit the description for the created ticket section
     # TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
     @commands.command()
     @commands.has_role(int(os.getenv("MAIN_ADMIN_ROLE")))
     async def embed(self, ctx, channel_category, custom_ticket, user_reaction, *,
                     text):  # asterisk allows for paragraph input
-        # err.embed_error_check(channel_category, custom_ticket, user_reaction, text, bot)
 
         # for customized title, create argument for title, and pass argument into title=
         # TODO: support other logos/URLs (probably an uploaded file with the embed command?)
@@ -163,7 +138,8 @@ class TestCog(commands.Cog):
             # An exception raised when the command invoker lacks admin permissions.
             # https://discordpy.readthedocs.io/en/stable/ext/commands/api.html#discord.ext.commands.CheckFailure
             await ctx.send("Only admin users are permitted to execute embed commands.")
-        elif error.args[0].startswith("Command raised an exception: ValueError: Invalid emoji entered to the embed() command"):
+        elif error.args[0].startswith(
+                "Command raised an exception: ValueError: Invalid emoji entered to the embed() command"):
             await ctx.send(str(error))
         else:
             # Unknown exception raised.
@@ -197,68 +173,68 @@ class TestCog(commands.Cog):
 
     # Expo Server helper function for expo channel creation
     @commands.command()
-    
     @commands.has_role(int(os.getenv("EXPO_ADMIN_ROLE")))
-    async def expo(self, ctx, category_channel_name, text_channel_name, voice_channel_name, low_bound_num, high_bound_num):
-        #NOTE TEST command: /expo team- team team 1 3
+    async def expo(self, ctx, category_channel_name, text_channel_name, voice_channel_name, low_bound_num,
+                   high_bound_num):
+        # NOTE TEST command: /expo team- team team 1 3
         await ctx.message.delete()  # immediately deletes original command from chat
-        #TODO: Error check expo arguments
+        # TODO: Error check expo arguments
 
-        #! create a set of channels (category with text channel + voice channel)
+        # ! create a set of channels (category with text channel + voice channel)
         # adds 1 to high_bound to be inclusive
-        for i in range(int(low_bound_num), int(high_bound_num) + 1 ):
+        for i in range(int(low_bound_num), int(high_bound_num) + 1):
             name = category_channel_name + str(i)
             # creates guild
             guild = ctx.message.guild
 
-            #! creates a role for each of the set of channels
+            # ! creates a role for each of the set of channels
             # create role
-            team_role = await guild.create_role(name="Team "+str(i))
+            team_role = await guild.create_role(name="Team " + str(i))
 
             # permissions
             overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=True),
-            team_role: discord.PermissionOverwrite(read_messages=True) # !imp adds team permissions 
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                guild.me: discord.PermissionOverwrite(read_messages=True),
+                team_role: discord.PermissionOverwrite(read_messages=True)  # !imp adds team permissions
             }
 
-            new_category = await ctx.guild.create_category(name, overwrites=overwrites) 
-            
+            new_category = await ctx.guild.create_category(name, overwrites=overwrites)
+
             # create text channel
-            await guild.create_text_channel("{}-{}-text".format(text_channel_name, str(i)), category=new_category ,
-                overwrites=overwrites)
+            await guild.create_text_channel("{}-{}-text".format(text_channel_name, str(i)), category=new_category,
+                                            overwrites=overwrites)
             # create voice channel
-            await guild.create_voice_channel("{}-{}-voice".format(voice_channel_name, str(i)), category=new_category,  
-                overwrites=overwrites) 
-    # end of /expo command
+            await guild.create_voice_channel("{}-{}-voice".format(voice_channel_name, str(i)), category=new_category,
+                                             overwrites=overwrites)
+            # end of /expo command
 
     # Expo server on_member_join
-    async def in_hackrpi(self, member_id): 
+    async def in_hackrpi(self, member_id):
         # get expo server guild
-        guild = self.bot.get_guild(self.EXPO_SERVER) 
- 
+        guild = self.bot.get_guild(self.EXPO_SERVER)
+
         # get main HackRPI server guild
-        main_guild = self.bot.get_guild(self.MAIN_SERVER) 
+        main_guild = self.bot.get_guild(self.MAIN_SERVER)
         MAIN_JUDGES = main_guild.get_role(self.MAIN_JUDGE_ROLE)
         MAIN_ATTENDEES = main_guild.get_role(self.MAIN_ATTENDEE_ROLE)
- 
-        #! check main hackrpi server for JUDGE role
+
+        # ! check main hackrpi server for JUDGE role
         if any(m.id == member_id for m in MAIN_JUDGES.members):
             # apply respective role
             judge_role = guild.get_role(self.EXPO_JUDGE_ROLE)
             user = guild.get_member(member_id)
             await user.add_roles(judge_role)
-            #! check main hackrpi server for ATTENDEE role
-        elif any(m.id == member_id for m in MAIN_ATTENDEES.members): 
+            # ! check main hackrpi server for ATTENDEE role
+        elif any(m.id == member_id for m in MAIN_ATTENDEES.members):
             # apply respective role
             attend_role = guild.get_role(self.EXPO_ATTENDEE_ROLE)
             user = guild.get_member(member_id)
             await user.add_roles(attend_role)
         '''NOTE For additional roles: add constant role ID at top of bot class
-           copy and paste if statement snippet above and edit for Sponsor (Specific) role or HackRPI role''' 
+           copy and paste if statement snippet above and edit for Sponsor (Specific) role or HackRPI role'''
 
     @commands.Cog.listener()
-    async def on_member_join(self, member):  
+    async def on_member_join(self, member):
         if member.guild.id == self.EXPO_SERVER:
             await self.in_hackrpi(member.id)
     # end of on_member_join expo server role assignment
