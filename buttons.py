@@ -34,7 +34,7 @@ class TicketDeletionButton(discord.ui.Button):
         self.bot = bot
 
     async def callback(self, interaction: discord.Interaction):
-        await channel_actions.delete_help_channel(interaction, self.bot)
+        await channel_actions.delete_help_channel(self, interaction, self.bot)
 
 
 class WebsiteButton(discord.ui.Button):
