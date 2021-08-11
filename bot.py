@@ -34,12 +34,12 @@ class TestCog(commands.Cog):
     
     def __init__(self, bot):
         self.bot = bot
-        print("running")
+        print("Bot started...")
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print("Running...")
-        self.bot.add_view(buttons.TicketCreationView())
+        print("Bot ready...")
+        self.bot.add_view(buttons.TicketCreationView(self.bot))
 
     # !on reaction
     # @commands.Cog.listener()
@@ -90,7 +90,7 @@ class TestCog(commands.Cog):
 
         embed.set_footer(text=b64.encode(footer))  # add category to embed footer
 
-        ticket_creation_view = buttons.TicketCreationView()
+        ticket_creation_view = buttons.TicketCreationView(self.bot)
         await ctx.send(file=file, embed=embed, view=ticket_creation_view)
 
         # Checks if category already exists and creates the category if it doesn't

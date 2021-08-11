@@ -93,7 +93,7 @@ import os
 #         await message.edit(embed=new_help_desk_embed)
 
 
-async def create_help_channel(self, interaction):
+async def create_help_channel(self, interaction, bot):
     user = interaction.user
     guild = interaction.guild
     message = interaction.message
@@ -127,8 +127,6 @@ async def create_help_channel(self, interaction):
         overwrites=overwrites,
     )
 
-    channel_id = new_channel.id
-
     # # remove emoji after channel creation:
     # await message.remove_reaction(payload.emoji.name, user)  # remove user's emoji reaction
 
@@ -147,7 +145,7 @@ async def create_help_channel(self, interaction):
     file = discord.File("assets/f20logo.png", filename="f20logo.png")
     ticket_embed.set_thumbnail(url="attachment://f20logo.png")
 
-    ticket_deletion_view = buttons.TicketDeletionView(channel_id)
+    ticket_deletion_view = buttons.TicketDeletionView(bot)
 
 
     # set footer
@@ -181,7 +179,7 @@ async def create_help_channel(self, interaction):
 
 
 # async def chat_history(channel, payload, bot):
-async def chat_history(channel, this_client):
+async def chat_history(channel, this_client, bot):
     users = set()
     with open(f"{channel.name}.txt", "w") as file:
         async for message in channel.history(oldest_first=True):
@@ -215,7 +213,7 @@ async def chat_history(channel, this_client):
                 file.write("[" + time + "] " + nickname + ":    " + str(message.content) + "\n")
     file.close()
     ticket_tracker_id = int(os.getenv("TICKET_TRACKER_CHANNEL"))
-    tracker_channel = this_client.get_channel(ticket_tracker_id)  # Hard-code the administrator channel ID into this operation
+    tracker_channel = bot.get_channel(ticket_tracker_id)  # Hard-code the administrator channel ID into this operation
 
     # Send channel transcript
     if len(users) > 0:
@@ -238,11 +236,9 @@ async def chat_history(channel, this_client):
 #         await channel.delete()
 
 
-async def delete_help_channel(interaction, channel_id):
-    print("HELLO WORLD")
+async def delete_help_channel(interaction, bot):
     channel = interaction.channel
     this_client = discord.Client()
-    await chat_history(channel, this_client)
+    await chat_history(channel, this_client, bot)
     await channel.delete()
-
-    # channel = bot.get_channel()
+    
