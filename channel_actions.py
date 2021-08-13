@@ -5,7 +5,7 @@ import buttons
 import os
 
 
-async def create_help_channel(self, interaction, bot):
+async def create_help_channel(interaction, bot):
     user = interaction.user
     guild = interaction.guild
     message = interaction.message
@@ -129,7 +129,7 @@ async def chat_history(channel, bot):
         await tracker_channel.send(f"{channel.name} was closed with no conversation.")  # Send message to admin channel
 
 
-async def delete_help_channel(self, interaction, bot):
+async def delete_help_channel(interaction, bot):
     channel = interaction.channel
     await chat_history(channel, bot)  # Send transcript to tracker channel
     await channel.delete()  # Delete the ticket channel

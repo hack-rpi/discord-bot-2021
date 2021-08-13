@@ -36,6 +36,7 @@ class TestCog(commands.Cog):
         print("Bot ready...")
         self.bot.add_view(buttons.TicketCreationView(self.bot))
         self.bot.add_view(buttons.TicketDeletionView(self.bot))
+        self.bot.add_view(buttons.TicketDeletionConfirmationView(self.bot))
 
     # TODO: potentially look into being able to edit the description for the created ticket section
     # TODO: change channel_category to be an ID to an existing category, and update it in create_help_channel when searching
