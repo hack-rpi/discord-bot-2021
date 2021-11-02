@@ -34,7 +34,7 @@ class TicketCreationButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         ticket_name = await channel_actions.create_help_channel(interaction, self.bot)
-        interaction_response_embed = discord.Embed(description="The ticket '" + ticket_name + "' has been opened for"
+        interaction_response_embed = discord.Embed(description="The ticket '" + ticket_name + "' has been opened for "
                                                                                               "you. Please check your "
                                                                                               "list of channels to "
                                                                                               "find it.")
